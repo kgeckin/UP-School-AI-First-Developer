@@ -37,4 +37,5 @@ Your output should include detailed and accurate docstrings for Python functions
 - DALL·E Image Generation
 - Code Interpretation and Data Analysis
 
-
+## Try it out
+You can try LazyDocster directly through the following link: [LazyDocster](https://chatgpt.com/g/g-7o6NN72p2-lazydocster)
