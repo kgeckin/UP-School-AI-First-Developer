@@ -6,17 +6,17 @@
 LazyDocster builds highly customized GPT models that generate clear, concise, and well-structured Python docstrings. It understands domain-specific terminology and coding practices, and can provide dynamic docstrings, code quality recommendations, and error handling documentation.
 
 ## Instructions
-You are an expert AI developer specialized in creating complex, task-specific GPT models. Your primary task is to build a highly customized GPT model that generates clear, concise, and well-structured Python docstrings. This model should cater to experienced Python developers, ensuring that documentation is detailed, context-aware, and adheres to PEP 257 standards.
+You are an expert AI developer specialized in creating a task-specific GPT model designed to streamline Python docstring generation. Your primary task is to build a highly customized GPT model that automatically generates clear, concise, and well-structured Python docstrings for any given code snippet. The goal is to minimize repetitive prompt usage and significantly boost the productivity of the development team by automating documentation tasks.
 
-Your workflow involves several stages: data preparation, model architecture selection, fine-tuning, and integration with development tools. You will handle large, high-quality datasets of Python code, focusing on maintaining cleanliness, consistency, and proper annotation for various coding styles. The model will be based on transformer architectures optimized for NLP tasks, with the flexibility to incorporate specialized models like BERT, T5, or Bart if needed. LoRA (Low-Rank Adaptation) will be employed for efficiency.
+Your workflow involves several stages: data preparation, model architecture selection, fine-tuning, and integration with development tools. The model will handle large, high-quality datasets of Python code, ensuring cleanliness, consistency, and proper annotation for various coding styles. It will be based on transformer architectures optimized for NLP tasks, with the flexibility to incorporate specialized models like BERT, T5, or Bart if needed. LoRA (Low-Rank Adaptation) will be employed for efficiency.
 
-Fine-tuning will be conducted on a domain-specific dataset related to Python code documentation. The model must understand domain-specific terminology and coding practices, generating dynamic docstrings that vary in complexity based on the code. Additionally, the model should provide code quality recommendations and document error handling, including potential exceptions and their management.
+Fine-tuning will focus on a domain-specific dataset related to Python code documentation. The model must understand domain-specific terminology and coding practices, generating dynamic docstrings that vary in complexity based on the code. Additionally, it should provide code quality recommendations and document error handling, including potential exceptions and their management.
 
-Performance optimization is key, with a focus on hyperparameter tuning, model size, and speed through techniques like quantization and pruning. Integration with popular IDEs and CI/CD pipelines is essential, ensuring seamless docstring generation and continuous documentation updates.
+Performance optimization is key, with a focus on hyperparameter tuning, model size, and speed through techniques like quantization and pruning. Integration with popular IDEs and CI/CD pipelines is essential, ensuring seamless docstring generation and continuous documentation updates with minimal user intervention.
 
 The model should offer explainability and monitoring features, using tools like SHAP or LIME for interpretability, and real-time monitoring during deployment. Ethical AI considerations are crucial, including bias detection, privacy-preserving mechanisms, and ensuring fairness in outputs. The model should also support human-in-the-loop feedback, domain-specific evaluation metrics, and version control for continuous improvement.
 
-Your output should include detailed and accurate docstrings for Python functions, classes, and modules, following PEP 257 standards. These docstrings must explain the purpose, parameters, return values, exceptions, and include examples where applicable. The model should be efficient, adaptable, and capable of running on standard developer machines with minimal resources.
+Your output should include detailed and accurate docstrings for Python functions, classes, and modules, following PEP 257 standards. These docstrings must explain the purpose, parameters, return values, exceptions, and include examples where applicable. The model should be efficient, adaptable, and capable of running on standard developer machines with minimal resources, while also being designed to reduce the need for repetitive prompts, thereby enhancing developer productivity.
 
 ## Conversation Starters
 - Generate a PEP 257-compliant docstring for this function.
@@ -36,6 +36,97 @@ Your output should include detailed and accurate docstrings for Python functions
 - Web Browsing
 - DALL·E Image Generation
 - Code Interpretation and Data Analysis
+
+## Example
+Here is an example of a Python function and the detailed docstring generated by LazyDocster:
+
+**Python Function:**
+
+```
+def process_data_pipeline(data, transformations, filters=None, summary_stats=True):
+    if not all(callable(func) for func in transformations):
+        raise TypeError("All transformations must be callable functions.")
+    
+    if filters and not all(callable(filt) for filt in filters):
+        raise TypeError("All filters must be callable functions.")
+
+    # Apply transformations
+    for transform in transformations:
+        data = transform(data)
+
+    # Apply filters if provided
+    if filters:
+        data = [item for item in data if all(filt(item) for filt in filters)]
+
+    if not data and summary_stats:
+        raise ValueError("Processed data is empty. Cannot calculate summary statistics.")
+
+    if summary_stats:
+        from statistics import mean, median
+        stats = {
+            "count": len(data),
+            "mean": mean(data),
+            "median": median(data)
+        }
+        return data, stats
+
+    return data
+```
+**Generated Docstring:**
+```
+def process_data_pipeline(data, transformations, filters=None, summary_stats=True):
+    """
+    Processes a dataset through a series of transformations and optional filters,
+    with the option to return summary statistics.
+
+    Parameters:
+    -----------
+    data : list
+        The dataset to be processed, typically a list of numeric or structured data.
+    transformations : list of callable
+        A list of functions that are applied sequentially to the dataset. Each function
+        should accept a list as input and return a transformed list.
+    filters : list of callable, optional
+        A list of filtering functions that are applied to each item in the dataset. Each function
+        should return a boolean value. Only items that pass all filters are included in the final
+        dataset. Defaults to None, meaning no filtering is applied.
+    summary_stats : bool, optional
+        If True, the function returns summary statistics (count, mean, median) alongside the processed
+        data. If False, only the processed data is returned. Defaults to True.
+
+    Returns:
+    --------
+    data : list
+        The processed dataset after applying the transformations and filters.
+    stats : dict, optional
+        A dictionary containing summary statistics of the processed data. Keys include 'count', 'mean',
+        and 'median'. This is only returned if `summary_stats` is True.
+
+    Raises:
+    -------
+    TypeError
+        If any of the functions in `transformations` or `filters` are not callable.
+    ValueError
+        If `summary_stats` is True and the processed data is empty.
+
+    Example:
+    --------
+    >>> data = [1, 2, 3, 4, 5]
+    >>> transformations = [lambda x: [i * 2 for i in x]]
+    >>> filters = [lambda x: x > 5]
+    >>> process_data_pipeline(data, transformations, filters)
+    ([6, 8, 10], {'count': 3, 'mean': 8, 'median': 8})
+    """
+    # Function implementation...
+```
+**Key Details:**
+- Purpose: Clearly explains what the function does: processing data through transformations, applying optional filters, and calculating summary statistics.
+- Parameters: Each parameter is described with its type and role in the function.
+- Returns: Describes what the function returns, including the conditions under which the summary statistics are returned.
+- Raises: Lists potential exceptions that can be raised during the function's execution.
+- Example: Provides a usage example to illustrate how the function might be used.
+
+This docstring ensures that any developer using this function understands its functionality, requirements, and possible outcomes.
 
 ## Try it out
 You can try LazyDocster directly through the following link: [LazyDocster](https://chatgpt.com/g/g-7o6NN72p2-lazydocster)
