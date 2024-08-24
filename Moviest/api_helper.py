@@ -1,56 +1,64 @@
-import streamlit as st
-import pandas as pd
-from api_helper import get_movie_recommendations  # api_helper.py dosyasından fonksiyonu içe aktarıyoruz
+import openai
+from api_key import openai_api_key  # api_key.py dosyasından değişkeni içe aktarıyoruz
 
-# Streamlit Arayüzü
-st.title('Moviest: Film Öneri Sistemi')
-st.write('Sevdiğiniz film türlerini seçin ve opsiyonel olarak ek bilgileri girin. Size özel film önerileri alın!')
+# OpenAI API anahtarını ayarlayın
+openai.api_key = openai_api_key
 
-# Kullanıcıdan Girdi Alma
 
-# Zorunlu: Film Türleri ve Seçim Yöntemi
-st.subheader('Film Türü Seçimi')
-genres = st.multiselect(
-    'Film Türleri (Zorunlu)',
-    ['Aksiyon', 'Komedi', 'Drama', 'Bilim Kurgu', 'Korku', 'Fantastik', 'Animasyon', 'Anime', 'Donghua'],
-    help="Öneri almak için en az bir tür seçin."
-)
+def get_movie_recommendations(genres, genre_selection_method, optional_details):
+    """
+    Bu fonksiyon, OpenAI API kullanarak kullanıcının tercihlerine göre film önerisi yapar.
 
-genre_selection_method = st.radio(
-    'Film Türü Seçim Yöntemi (Zorunlu)',
-    ['ve', 'veya'],
-    help="Seçilen türler arasında 've' veya 'veya' bağlantısı kurarak öneri yapabilirsiniz."
-)
-
-# Opsiyonel Bilgiler
-st.subheader('Ek Özellikler (Opsiyonel)')
-favorite_movies = st.text_area('Sevdiğiniz Filmler', placeholder='Örnek: Inception, Matrix')
-favorite_books = st.text_area('Beğendiğiniz Kitaplar', placeholder='Örnek: Harry Potter, Yüzüklerin Efendisi')
-favorite_series = st.text_area('Beğendiğiniz Diziler', placeholder='Örnek: Game of Thrones, Breaking Bad')
-imdb_score = st.slider('Minimum IMDb Puanı', 0.0, 10.0, 0.0)
-rotten_tomatoes_score = st.slider('Minimum Rotten Tomatoes Puanı', 0, 100, 0)
-age_rating = st.selectbox('Yaş Sınırı', ['', 'G', 'PG', 'PG-13', 'R', 'NC-17'])
-release_year = st.slider('Filmin Çıkış Yılı (Opsiyonel)', 1900, 2024, (1990, 2024))
-director_preference = st.text_input('Tercih Edilen Yönetmen (Opsiyonel)', placeholder='Örnek: Christopher Nolan, Quentin Tarantino')
-
-if st.button('Öneriler Al'):
-    if not genres:
-        st.error('Lütfen en az bir film türü seçin.')
+    :param genres: Kullanıcının zorunlu olarak belirttiği film türleri listesi
+    :param genre_selection_method: Kullanıcının film türü seçiminde kullandığı yöntem ("ve" veya "veya")
+    :param optional_details: Kullanıcının opsiyonel olarak belirttiği ek bilgiler (filmler, diziler, kitaplar, vb.)
+    :return: Önerilen filmler hakkında tablo formatında bilgi içeren metin
+    """
+    # Tür seçim mantığına göre prompt oluşturma
+    if genre_selection_method == 've':
+        # Kullanıcı "ve" seçtiyse, tüm türleri içeren filmler önerilecek
+        genre_condition = f"Tüm türler: {', '.join(genres)}"
     else:
-        # Kullanıcıdan gelen bilgileri bir sözlükte topluyoruz
-        optional_details = {
-            'favorite_movies': favorite_movies.split(', ') if favorite_movies else None,
-            'favorite_books': favorite_books.split(', ') if favorite_books else None,
-            'favorite_series': favorite_series.split(', ') if favorite_series else None,
-            'imdb_score': imdb_score if imdb_score > 0 else None,
-            'rotten_tomatoes_score': rotten_tomatoes_score if rotten_tomatoes_score > 0 else None,
-            'age_rating': age_rating if age_rating else None,
-            'release_year': release_year if release_year else None,
-            'director_preference': director_preference if director_preference else None
-        }
+        # Kullanıcı "veya" seçtiyse, herhangi bir türü içeren filmler önerilecek
+        genre_condition = f"Herhangi bir tür: {', '.join(genres)}"
 
-        recommendations = get_movie_recommendations(genres, genre_selection_method, optional_details)
+    # Opsiyonel bilgiler için prompt oluşturma
+    prompt_parts = [genre_condition]
 
-        # Önerilen filmleri tablo formatında görüntüleme
-        st.write('Önerilen Filmler:')
-        st.markdown(recommendations)
+    if optional_details.get('favorite_movies'):
+        prompt_parts.append(f"Sevdiği Filmler: {', '.join(optional_details['favorite_movies'])}")
+    if optional_details.get('favorite_books'):
+        prompt_parts.append(f"Beğendiği Kitaplar: {', '.join(optional_details['favorite_books'])}")
+    if optional_details.get('favorite_series'):
+        prompt_parts.append(f"Beğendiği Diziler: {', '.join(optional_details['favorite_series'])}")
+    if optional_details.get('imdb_score'):
+        prompt_parts.append(f"Minimum IMDb Puanı: {optional_details['imdb_score']}")
+    if optional_details.get('rotten_tomatoes_score'):
+        prompt_parts.append(f"Minimum Rotten Tomatoes Puanı: {optional_details['rotten_tomatoes_score']}")
+    if optional_details.get('age_rating'):
+        prompt_parts.append(f"Yaş Sınırı: {optional_details['age_rating']}")
+    if optional_details.get('release_year'):
+        prompt_parts.append(f"Filmin Çıkış Yılı: {optional_details['release_year']}")
+    if optional_details.get('director_preference'):
+        prompt_parts.append(f"Tercih Edilen Yönetmen: {optional_details['director_preference']}")
+
+    # Promptu oluşturma
+    prompt = (
+            "Kullanıcının tercihlerine göre 5 film önerisi yap ve her film için tablo formatında şu bilgileri ver: "
+            "Film Adı, Türü, IMDb Puanı, Süresi, Yapım Ülkesi, Genel Konusu, IMDb Linki ve Bu filmin neden önerildiği."
+            " İşte kullanıcının tercihleri: " + ". ".join(prompt_parts) + "."
+    )
+
+    # OpenAI API çağrısı
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system",
+             "content": "You are a helpful assistant that provides detailed movie recommendations in a table format."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=500,
+        temperature=0.7,
+    )
+
+    return response['choices'][0]['message']['content'].strip()
