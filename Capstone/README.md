@@ -1,7 +1,7 @@
 # LinguaX: AI-Powered Video Translation and Transcription
 
 <p align="center">
-  <img src="https://github.com/kgeckin/UP-School-AI-First-Developer/blob/60482d7bc5a748e8c97c11c3f0a72099b38c31f4/Capstone/LOGO.png" alt="LinguaX Logo" width="200"/>
+  <img src="https://github.com/kgeckin/UP-School-AI-First-Developer/blob/1e1a84ec306c5ac27dec84f7a770c760d5e0f375/Capstone/assets/LOGO.png" alt="LinguaX Logo" width="200"/>
 </p>
 
 ## Introduction
