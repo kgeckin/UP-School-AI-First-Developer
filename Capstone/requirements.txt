@@ -1,0 +1,7 @@
+streamlit
+ffmpeg-python
+python-dotenv
+openai
+pyttsx3
+langdetect
+streamlit-option-menu

@@ -1,0 +1,19 @@
+# Ignore environment variables
+.env
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Ignore PyCharm/IntelliJ project files
+.idea/
+
+# Ignore SQLite Database Files
+*.db
