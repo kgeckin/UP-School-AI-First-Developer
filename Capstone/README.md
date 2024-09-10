@@ -41,11 +41,22 @@
 
 ```
 Capstone/
-    ├── app.py
-    ├── LOGO.png
-    ├── README.md
-    ├── requirements.txt
-    └── utils.py
+│
+├── src/                   
+│   ├── app.py             
+│   └── utils.py          
+│
+├── assets/                
+│   ├── LOGO.png          
+│
+├── data/                 
+│   ├── LinguaX_Demo.mp4   
+│   ├── Presentation.pptx  
+│
+├── requirements.txt       
+├── .gitignore            
+└── README.md              
+
 ```
 
 ## About Me
