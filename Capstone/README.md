@@ -20,7 +20,7 @@
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-repo/LinguaX.git
+   https://github.com/kgeckin/UP-School-AI-First-Developer.git
    ```
 2. Install the required dependencies:
    ```
@@ -45,8 +45,7 @@ Capstone/
     ├── LOGO.png
     ├── README.md
     ├── requirements.txt
-    ├── utils.py
-    └── .env  # Sensitive file, should not be committed
+    └── utils.py
 ```
 
 ## About Me
