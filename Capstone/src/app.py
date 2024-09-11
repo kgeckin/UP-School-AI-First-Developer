@@ -79,7 +79,7 @@ st.markdown(
     unsafe_allow_html=True)
 
 # Step 1: Video Upload
-uploaded_files = st.file_uploader("Upload Your Video Files", type=["mp4", "avi", "mov", "m4v", "m2a", "mpeg4", "m4a"],
+uploaded_files = st.file_uploader("Upload Your Video Files", type=["mp3", "mp4", "avi", "mov", "m4v", "m2a", "mpeg4", "m4a"],
                                   accept_multiple_files=True)
 
 if uploaded_files:
