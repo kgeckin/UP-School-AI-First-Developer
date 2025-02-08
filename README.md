@@ -30,18 +30,15 @@ Bu repo, AI-First Developer Programı süresince tamamlanan ödevleri, ders notl
 - **Dersler:** Mesai saatleri dışında, hafta içi akşam veya hafta sonu yapılır.
 
 ## Dersler ve Ödevler
+<div align="center">
+  
+| Ödevler |
+|--------------------|
+| **ChatGPT ve GitHub Co-Pilot Entegrasyonu**<br>**Ders:**<br>4.1 Introduction to ChatGPT 4<br>4.2 Prompt Engineering ve Uygulama<br>**Ödev:** [Cat Facts Application](https://github.com/kgeckin/UP-School-AI-First-Developer/tree/538d117dba05f9f61b95503cc7794bd38d33a5fb/catfactsApplication) | 11    | **Dersler ve Ödevler Güncellenecek** |
+| **İleri Düzey ChatGPT Teknikleri ve DevOps**<br>**Ders:**<br>5.1 Advanced ChatGPT 4 Techniques<br>5.2 DevOps ve AI Entegrasyonu<br>**Ödev:** [CustomGPT](https://github.com/kgeckin/UP-School-AI-First-Developer/tree/c9ea57751415cc0e4bb6eb475cc67577282c47a1/CustomGPT) |
+|**LinguaX - AI Video Transcription & Translation**<br>OpenAI Whisper ve GPT-4 tabanlı çok dilli transkripsiyon ve çeviri uygulaması.<br>**Capstone:** [LinguaX: AI-Powered Video Translation and Transcription](https://github.com/kgeckin/UP-School-AI-First-Developer/tree/main/Capstone) |
 
-| Hafta | Dersler ve Ödevler | Hafta | Dersler ve Ödevler |
-|-------|--------------------|-------|--------------------|
-| 1     | **Giriş ve Temel Bilgiler**<br>**Ders:** UP School Tanıtımı, Program Takvimi ve İçerik Bilgilendirmesi | 7     | **Dersler ve Ödevler Güncellenecek** |
-| 2     | **Makine Öğrenmesi ve Üretken Yapay Zeka**<br>**Ders:**<br>1.1 Makine Öğrenmesi Nedir, Makine Nasıl Öğrenir?<br>1.2 Derin Öğrenme<br>1.3 Derin Öğrenme Modelleri (CNN - RNN)<br>**Ödev1:** Intro to Machine Learning ve Deep Learning Quiz | 8     | **Dersler ve Ödevler Güncellenecek** |
-| 3     | **Transformer Mimarisi ve ChatGPT**<br>**Ders:**<br>2.1 Geleneksel Encoder-Decoder Yapısı<br>2.2 Attention (Dikkat) Mekanizması<br>**Ödev2:** Encoder-Decoder Architecture & Attention Mechanism | 9     | **Dersler ve Ödevler Güncellenecek** |
-| 4     | **Üretken Yapay Zeka Temelleri**<br>**Ders:**<br>3.1 Transformer Mimarisi ve Kullanım Alanları<br>3.2 Transformer Mimarisi vs Geleneksel Mimari<br>**Ödev3:** Transformer Architecture & GenAI | 10    | **Dersler ve Ödevler Güncellenecek** |
-| 5     | **ChatGPT ve GitHub Co-Pilot Entegrasyonu**<br>**Ders:**<br>4.1 Introduction to ChatGPT 4<br>4.2 Prompt Engineering ve Uygulama<br>**Ödev:** [Cat Facts Application](https://github.com/kgeckin/UP-School-AI-First-Developer/tree/538d117dba05f9f61b95503cc7794bd38d33a5fb/catfactsApplication) | 11    | **Dersler ve Ödevler Güncellenecek** |
-| 6     | **İleri Düzey ChatGPT Teknikleri ve DevOps**<br>**Ders:**<br>5.1 Advanced ChatGPT 4 Techniques<br>5.2 DevOps ve AI Entegrasyonu<br>**Ödev:** [CustomGPT](https://github.com/kgeckin/UP-School-AI-First-Developer/tree/c9ea57751415cc0e4bb6eb475cc67577282c47a1/CustomGPT)  | 12    | <br>**Capstone:** [LinguaX: AI-Powered Video Translation and Transcription](https://github.com/kgeckin/UP-School-AI-First-Developer/tree/main/Capstone) |
-
-
-
+</div>
 
 ## Kaynaklar
 
