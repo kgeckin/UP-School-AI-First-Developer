@@ -1,0 +1,42 @@
+name: LinguaX Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+      - "refactor/**"
+    paths:
+      - "Capstone/**"
+      - ".github/workflows/linguax-ci.yml"
+  pull_request:
+    paths:
+      - "Capstone/**"
+      - ".github/workflows/linguax-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Python source and tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Capstone
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Check Python source
+        run: python -m compileall -q src tests
+
+      - name: Run unit tests
+        run: python -m pytest -q tests

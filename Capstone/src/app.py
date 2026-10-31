@@ -1,162 +1,193 @@
+"""Streamlit interface for LinguaX."""
+
+from __future__ import annotations
+
 import os
+import tempfile
+from io import BytesIO
+from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
+
 import streamlit as st
-import base64
-from utils import (create_database, process_video_audio, transcribe_audio,
-                   generate_srt_file, detect_language, translate_text,
-                   save_translation_to_db, load_translations_from_db)
 
-# Theme selection
-theme = st.sidebar.selectbox("Theme Selection", ["Light", "Dark"], index=0)
+from subtitles import build_srt
+from utils import api_client, extract_audio, transcribe_audio, translate_segments
 
-# Apply CSS for theme switching
-if theme == "Light":
-    st.markdown("""
-        <style>
-        body {
-            background-color: white;
-            color: black;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-        <style>
-        body {
-            background-color: #2e2e2e;
-            color: white;
-        }
-        </style>
-        """, unsafe_allow_html=True)
 
-# CSS for aligning the content in the center and styling title and subtitle
-st.markdown(
-    """
-    <style>
-    .center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .title {
-        text-align: center;
-        font-size: 50px;
-        font-weight: bold;
-    }
-    .subheader {
-        text-align: center;
-        font-size: 16px;
-        color: grey;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+LOGO = PROJECT_ROOT / "assets" / "LOGO.png"
+SUPPORTED_TYPES = ["mp3", "mp4", "avi", "mov", "m4v", "m4a", "wav", "webm"]
+LANGUAGES = {
+    "Turkish": "tr",
+    "English": "en",
+    "French": "fr",
+    "German": "de",
+    "Spanish": "es",
+    "Italian": "it",
+    "Portuguese": "pt",
+    "Russian": "ru",
+    "Dutch": "nl",
+}
 
-# Collapsible section for previous translations
-conn, c = create_database()
 
-with st.sidebar:
-    st.subheader("Past Translations")
-    translations_data = load_translations_from_db(c)
-    if translations_data:
-        for idx, row in enumerate(translations_data):
-            # Use expander to show translation details when clicked
-            with st.expander(f"Translation #{idx + 1} - {row[3]} - {row[4]}"):
-                st.text_area(f"{row[3]} Translation", row[2], key=f"text_area_{idx}")
+def create_bundle(results: list[dict]) -> bytes:
+    """Bundle subtitles using generated names only, never an uploaded filename."""
+    output = BytesIO()
+    with ZipFile(output, mode="w", compression=ZIP_DEFLATED) as archive:
+        for item in results:
+            directory = f"video_{item['index']:02d}"
+            archive.writestr(f"{directory}/original.srt", item["original_srt"])
+            for language, srt_content in item["translations"].items():
+                archive.writestr(
+                    f"{directory}/{LANGUAGES[language]}.srt",
+                    srt_content,
+                )
+    return output.getvalue()
 
-# Dynamic path for project directory
-image_path = os.path.join(os.getcwd(), "LOGO.png")
-st.markdown(
-    f'<div class="center"><img src="data:image/png;base64,{base64.b64encode(open(image_path, "rb").read()).decode()}" width="200"></div>',
-    unsafe_allow_html=True)
 
-# Main title
-st.markdown('<h1 class="title">LinguaX</h1>', unsafe_allow_html=True)
+def main() -> None:
+    st.set_page_config(
+        page_title="LinguaX | Video subtitles",
+        page_icon="🎬",
+        layout="wide",
+    )
 
-# Subtitle
-st.markdown(
-    '<h3 class="subheader">Effortlessly transcribe and translate your videos into multiple languages with AI-powered precision.</h3>',
-    unsafe_allow_html=True)
+    if LOGO.is_file():
+        st.image(str(LOGO), width=136)
+    st.title("LinguaX")
+    st.caption("Transcribe once. Translate into multiple languages. Keep the real timing.")
 
-# Step 1: Video Upload
-uploaded_files = st.file_uploader("Upload Your Video Files", type=["mp3", "mp4", "avi", "mov", "m4v", "m2a", "mpeg4", "m4a"],
-                                  accept_multiple_files=True)
+    st.info(
+        "Videos are processed in a temporary folder and removed after processing. "
+        "Audio and subtitle text are sent to an external AI API for transcription "
+        "and translation. Results remain in the current Streamlit session until cleared."
+    )
 
-if uploaded_files:
-    for uploaded_file in uploaded_files:
-        video_path = f"uploaded_video_{uploaded_file.name}"
-        with open(video_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-
-        # Step 2: Convert video to audio
-        audio_path = "output_audio.mp3"
-        process_video_audio(video_path, audio_path)
-
-        # Audio preview
-        audio_bytes = open(audio_path, 'rb').read()
-        st.audio(audio_bytes, format='audio/mp3')
-
-        # Step 3: Transcribe the audio to text
-        st.write("2. Transcribing audio to text (OpenAI Whisper)")
-        transcript = transcribe_audio(audio_path)
-        st.text_area("Transcription", transcript)
-
-        # Make the transcription downloadable
-        srt_file = generate_srt_file(transcript, "tr")
-        st.download_button("Download Transcription (.srt)", data=open(srt_file).read(), file_name="transcript_tr.srt")
-
-        # Step 4: Ask the user for which languages to translate the transcription into
-        detected_lang = detect_language(transcript)
-        st.info(f"Detected language: {detected_lang}. Please select the languages you want to translate to.")
-
-        # Provide a multi-select widget for language choices
-        languages_available = {
-            "Turkish": "tr", "English": "en", "French": "fr", "German": "de",
-            "Spanish": "es", "Italian": "it", "Portuguese": "pt", "Russian": "ru",
-            "Dutch": "nl",
-        }
-
-        selected_languages = st.multiselect(
-            "Select the languages you want to translate the transcription into:",
-            options=list(languages_available.keys()),
+    with st.form("conversion", clear_on_submit=False):
+        uploads = st.file_uploader(
+            "Video or audio files",
+            type=SUPPORTED_TYPES,
+            accept_multiple_files=True,
+            help="Upload short clips. A large recording may exceed the transcription API size limit.",
+        )
+        targets = st.multiselect(
+            "Translate to (optional)",
+            options=list(LANGUAGES),
+            default=[],
+        )
+        submitted = st.form_submit_button(
+            "Create subtitles", type="primary", use_container_width=True
         )
 
-        # Button to start the translation process
-        if st.button("Start Translation"):
-            # Step 5: Display the progress bar and start translation
-            st.write("Translating... Please wait.")
-            progress_bar = st.progress(0)
-            translations = {}
-            total_languages = len(selected_languages)
+    if submitted:
+        st.session_state["linguax_results"] = []
+        if not uploads:
+            st.warning("Choose at least one video or audio file.")
+        elif not os.getenv("OPENAI_API_KEY"):
+            st.error("Add OPENAI_API_KEY to the environment or Capstone/.env.")
+        else:
+            st.session_state["linguax_batch"] = st.session_state.get("linguax_batch", 0) + 1
+            progress = st.progress(0)
+            client = api_client()
 
-            for idx, language in enumerate(selected_languages):
-                lang_code = languages_available[language]
+            for index, upload in enumerate(uploads, start=1):
+                try:
+                    with tempfile.TemporaryDirectory(prefix="linguax_") as temp:
+                        folder = Path(temp)
+                        suffix = Path(upload.name).suffix.lower()
+                        if suffix not in {f".{item}" for item in SUPPORTED_TYPES}:
+                            raise ValueError("Unsupported file extension.")
 
-                if lang_code == detected_lang:
-                    st.warning(f"The transcript is already in {language}, skipping translation.")
-                    continue  # Skip if the detected language is the same as the selected language
+                        # Uploaded names are never used for local filesystem paths.
+                        source = folder / f"input{suffix}"
+                        audio = folder / "audio.mp3"
+                        source.write_bytes(upload.getvalue())
 
-                # Perform the translation
-                translation = translate_text(transcript, language)
-                translations[language] = translation
+                        with st.spinner(f"Processing {index}/{len(uploads)}: {upload.name}"):
+                            extract_audio(source, audio)
+                            transcript = transcribe_audio(audio, client=client)
+                            original_srt = build_srt(transcript.segments)
 
-                # Update the progress bar
-                progress_bar.progress((idx + 1) / total_languages)
+                            translations: dict[str, str] = {}
+                            for language in targets:
+                                if transcript.language.casefold() in {
+                                    language.casefold(),
+                                    LANGUAGES[language].casefold(),
+                                }:
+                                    continue
+                                translated_cues = translate_segments(
+                                    transcript.segments, language, client=client
+                                )
+                                translations[language] = build_srt(translated_cues)
 
-            # Hide progress bar and show results
-            st.write("Translation complete!")
+                            st.session_state["linguax_results"].append(
+                                {
+                                    "index": index,
+                                    "batch": st.session_state["linguax_batch"],
+                                    "name": upload.name,
+                                    "language": transcript.language,
+                                    "original_srt": original_srt,
+                                    "text": transcript.text,
+                                    "translations": translations,
+                                }
+                            )
+                except (ValueError, RuntimeError) as exc:
+                    st.error(f"Could not process {upload.name}: {exc}")
+                except Exception:
+                    st.error(
+                        f"Could not process {upload.name}. Check the API credentials, "
+                        "available quota, and supported media format."
+                    )
+                finally:
+                    progress.progress(index / len(uploads))
 
-            # Step 6: Show translations and download buttons
-            for language in selected_languages:
-                translation = translations.get(language)
-                if translation:
-                    st.text_area(f"{language} Translation", translation)
+            if st.session_state["linguax_results"]:
+                st.success("Subtitle generation completed for the files shown below.")
 
-                    # Make the translation downloadable
-                    lang_code = languages_available[language]
-                    srt_file = generate_srt_file(translation, lang_code)
-                    st.download_button(f"Download {language} Translation", data=open(srt_file).read(),
-                                       file_name=f"{lang_code}_translation.srt")
+    results = st.session_state.get("linguax_results", [])
+    if not results:
+        return
 
-            # Save translations to the database
-            save_translation_to_db(conn, c, transcript, translations)
+    st.divider()
+    st.subheader("Your subtitles")
+    for item in results:
+        with st.expander(f"{item['name']} · Detected: {item['language']}", expanded=True):
+            st.text_area(
+                "Transcription",
+                value=item["text"],
+                height=135,
+                key=f"transcription_{item['batch']}_{item['index']}",
+                disabled=True,
+            )
+            st.download_button(
+                "Download original subtitles",
+                data=item["original_srt"],
+                file_name=f"video_{item['index']:02d}_original.srt",
+                mime="application/x-subrip",
+                key=f"download_original_{item['batch']}_{item['index']}",
+            )
+
+            for language, content in item["translations"].items():
+                with st.expander(f"{language} subtitles"):
+                    st.download_button(
+                        f"Download {language}",
+                        data=content,
+                        file_name=f"video_{item['index']:02d}_{LANGUAGES[language]}.srt",
+                        mime="application/x-subrip",
+                        key=f"download_{item['batch']}_{item['index']}_{LANGUAGES[language]}",
+                    )
+
+    st.download_button(
+        "Download all subtitles as ZIP",
+        data=create_bundle(results),
+        file_name="linguax_subtitles.zip",
+        mime="application/zip",
+        type="primary",
+    )
+    if st.button("Clear session results"):
+        st.session_state.pop("linguax_results", None)
+        st.rerun()
+
+
+if __name__ == "__main__":
+    main()
