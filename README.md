@@ -1,27 +1,31 @@
-# AI First Developer Program
+<div align="center">
 
-A collection of learning projects and experiments created during an AI focused development program.
+<img src="docs/assets/cover.svg" width="100%" alt="AI First Developer: a collection of applied AI learning projects" />
 
-## Featured project
+**A collection of practical AI experiments, development exercises and a video transcription capstone.**
 
-### [LinguaX](Capstone/)
+[Capstone](Capstone/) · [Explore the projects](#explore-the-materials) · [License](LICENSE)
 
-A Streamlit application for timestamped video transcription, optional AI translation, and downloadable subtitles.
+</div>
 
-**[Read the project documentation](Capstone/README.md)**
+## Overview
 
-## Repository contents
+This repository documents work completed during the Up School AI First Developer education program. It contains small software exercises alongside the more substantial LinguaX capstone.
 
-| Path | Contents |
+The directories represent different coursework activities and are not all independent production applications.
+
+## Explore the materials
+
+| Project | Contents |
 | --- | --- |
-| [Capstone](Capstone/) | LinguaX application, documentation and tests |
-| [catfactsApplication](catfactsApplication/) | Cat Facts application coursework |
-| [CustomGPT](CustomGPT/) | Custom GPT coursework |
-| [Moviest](Moviest/) | Movie related application exercises |
+| [LinguaX](Capstone/) | Video transcription, optional translation and timed subtitles |
+| [Cat Facts](catfactsApplication/) | AI integration coursework and a small application |
+| [CustomGPT](CustomGPT/) | Custom GPT development exercises |
+| [Moviest](Moviest/) | Movie related application experiments |
 
-The repository contains educational exercises alongside a maintained capstone. The individual project directories have different levels of completeness and should be evaluated separately.
+## Getting started
 
-## LinguaX quick start
+Each exercise has different requirements. For LinguaX, see the [complete setup guide](Capstone/README.md) before running any commands.
 
 ```bash
 cd Capstone
@@ -29,12 +33,32 @@ python -m pip install -r requirements.txt
 streamlit run src/app.py
 ```
 
-Before launching, install FFmpeg and set `OPENAI_API_KEY` as described in the [LinguaX README](Capstone/README.md).
+This requires Python, FFmpeg and your own API key. See the capstone README for environment setup, privacy considerations and associated costs.
 
-## About the program
+## Repository structure
 
-This repository was created during the Up School AI First Developer learning program, which explored Python applications, AI integrations, prompt engineering, application development and practical tooling.
+```text
+UP-School-AI-First-Developer/
+├── Capstone/               # LinguaX application and tests
+├── catfactsApplication/    # Coursework
+├── CustomGPT/              # Coursework
+├── Moviest/                # Coursework
+├── docs/assets/            # Repository cover
+└── README.md
+```
 
-## Notes
+## Validation
 
-No customer data, private code, or API credentials are required to review the public sample source. External AI calls require your own API key and may incur usage costs.
+LinguaX has an isolated test suite. Run `python -m pytest -q tests` from the `Capstone` directory after installing its development dependencies. Other coursework directories may not have automated test coverage.
+
+## Architecture & decisions
+
+Technical design and limitations for the featured capstone are documented in [LinguaX architecture](Capstone/docs/ARCHITECTURE.md).
+
+## Security & limitations
+
+Examples are educational. Do not upload confidential media, include API credentials in source control, or treat an exercise as production ready without separate review.
+
+## License
+
+See the [MIT license](LICENSE). External course content and third party media may have separate ownership terms.
