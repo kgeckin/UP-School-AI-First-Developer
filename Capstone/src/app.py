@@ -60,7 +60,7 @@ def main() -> None:
     st.info(
         "Videos are processed in a temporary folder and removed after processing. "
         "Audio and subtitle text are sent to an external AI API for transcription "
-        "and translation. Results remain in this browser session until cleared."
+        "and translation. Results remain in the current Streamlit session until cleared."
     )
 
     with st.form("conversion", clear_on_submit=False):
@@ -80,12 +80,13 @@ def main() -> None:
         )
 
     if submitted:
+        st.session_state["linguax_results"] = []
         if not uploads:
             st.warning("Choose at least one video or audio file.")
         elif not os.getenv("OPENAI_API_KEY"):
             st.error("Add OPENAI_API_KEY to the environment or Capstone/.env.")
         else:
-            st.session_state["linguax_results"] = []
+            st.session_state["linguax_batch"] = st.session_state.get("linguax_batch", 0) + 1
             progress = st.progress(0)
             client = api_client()
 
@@ -122,6 +123,7 @@ def main() -> None:
                             st.session_state["linguax_results"].append(
                                 {
                                     "index": index,
+                                    "batch": st.session_state["linguax_batch"],
                                     "name": upload.name,
                                     "language": transcript.language,
                                     "original_srt": original_srt,
@@ -154,14 +156,15 @@ def main() -> None:
                 "Transcription",
                 value=item["text"],
                 height=135,
-                key=f"transcription_{item['index']}",
+                key=f"transcription_{item['batch']}_{item['index']}",
+                disabled=True,
             )
             st.download_button(
                 "Download original subtitles",
                 data=item["original_srt"],
                 file_name=f"video_{item['index']:02d}_original.srt",
                 mime="application/x-subrip",
-                key=f"download_original_{item['index']}",
+                key=f"download_original_{item['batch']}_{item['index']}",
             )
 
             for language, content in item["translations"].items():
@@ -171,7 +174,7 @@ def main() -> None:
                         data=content,
                         file_name=f"video_{item['index']:02d}_{LANGUAGES[language]}.srt",
                         mime="application/x-subrip",
-                        key=f"download_{item['index']}_{LANGUAGES[language]}",
+                        key=f"download_{item['batch']}_{item['index']}_{LANGUAGES[language]}",
                     )
 
     st.download_button(
