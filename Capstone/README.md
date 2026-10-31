@@ -1,72 +1,117 @@
-# LinguaX: AI-Powered Video Translation and Transcription
+<div align="center">
 
-<p align="center">
-  <img src="https://github.com/kgeckin/UP-School-AI-First-Developer/blob/1e1a84ec306c5ac27dec84f7a770c760d5e0f375/Capstone/assets/LOGO.png" alt="LinguaX Logo" width="200"/>
-</p>
+<img src="assets/LOGO.png" alt="LinguaX logo" width="140" />
 
-## Introduction
+# LinguaX
 
-**LinguaX** is an AI-powered application that transcribes and translates video files into multiple languages with precision. It leverages OpenAI's Whisper for transcription and GPT-4 for accurate translations, providing users with downloadable `.srt` subtitle files in their chosen languages.
+**AI assisted transcription, translation and timestamped subtitles**
 
-## Features
+An educational Streamlit application that turns video and audio files into subtitles while preserving the actual timing reported by Whisper.
 
-- **Video Upload**: Supports multiple video formats such as MP4, AVI, MOV, and more.
-- **Audio Extraction**: Automatically extracts audio from uploaded videos using ffmpeg.
-- **AI-Powered Transcription**: Converts extracted audio into text using OpenAI Whisper.
-- **Multi-Language Translation**: Translates transcriptions into various languages, including Turkish, English, French, Spanish, and more, with the power of GPT-4.
-- **Subtitle Generation**: Automatically generates `.srt` files for each language and allows users to download them.
+</div>
 
-## Installation
+## What it does
 
-1. Clone the repository:
-   ```
-   https://github.com/kgeckin/UP-School-AI-First-Developer.git
-   ```
-2. Install the required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+1. Extracts mono audio from uploaded media with FFmpeg.
+2. Requests a Whisper transcription with **segment timestamps**.
+3. Optionally translates each timed subtitle segment using a language model.
+4. Exports valid SubRip subtitles and a ZIP archive for multiple files.
 
-## How to Use
+No fabricated timestamps and no automatic database history. Uploaded files are processed in a temporary directory and removed when processing finishes. Transcript results are retained only in the active Streamlit session.
 
-1. Run the Streamlit app:
-   ```
-   streamlit run app.py
-   ```
-2. Upload a video file in the supported formats.
-3. Select the languages you want to translate the transcription into.
-4. Download the transcriptions and translations as `.srt` files.
+## Quick start
 
-## Project Structure
+**Prerequisites:** Python 3.11 or newer, FFmpeg installed on your system, and an OpenAI API key with available credits.
 
+From the repository root:
+
+```bash
+cd Capstone
+python -m venv .venv
 ```
+
+Activate the environment:
+
+```bash
+# macOS / Linux
+source .venv/bin/activate
+```
+
+```powershell
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Copy `.env.example` to `.env`, then replace the placeholder value for `OPENAI_API_KEY`. Never commit your actual key.
+
+```bash
+streamlit run src/app.py
+```
+
+Open the local address provided by Streamlit, upload one or more media files, and optionally select translation languages.
+
+**FFmpeg check:** Run `ffmpeg -version` in the same terminal. The Python package `ffmpeg-python` does not install the FFmpeg executable.
+
+## Project layout
+
+```text
 Capstone/
-│
-├── src/                   
-│   ├── app.py             
-│   └── utils.py          
-│
-├── assets/                
-│   ├── LOGO.png          
-│
-├── data/                 
-│   ├── LinguaX_Demo.mp4   
-│   ├── Presentation.pptx  
-│
-├── requirements.txt       
-├── .gitignore            
-└── README.md              
-
+├── .env.example
+├── .gitignore
+├── .streamlit/
+│   └── config.toml
+├── assets/
+│   └── LOGO.png
+├── Data/                 # Original educational video demos
+├── docs/
+│   └── ARCHITECTURE.md
+├── src/
+│   ├── app.py            # Streamlit interface
+│   ├── utils.py          # FFmpeg and OpenAI integrations
+│   └── subtitles.py      # Pure SubRip formatting and validation
+├── tests/
+│   ├── conftest.py
+│   ├── test_subtitles.py
+│   └── test_utils.py
+├── requirements.txt
+├── requirements-dev.txt
+└── README.md
 ```
 
-## About Me
+## Tests
 
-I am Kardellen Geçkin, a passionate AI enthusiast and cybersecurity professional. I have a strong background in AI, machine learning, and natural language processing. Through my journey, I have worked on multiple projects combining AI with cybersecurity and video translation, with a keen interest in NLP technologies.
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q tests
+```
+
+The tests use mocked API responses and do not require an OpenAI key or send paid requests.
+
+## Limitations and privacy
+
+- Uploads are sent to an external AI provider for processing. Do not upload confidential, regulated, or third-party material without authorization.
+- The transcription service has a request size limit. LinguaX checks the extracted MP3 against a 24 MiB local cap. It does not yet implement automatic audio splitting.
+- Translated text keeps Whisper's **source segment boundaries**. This preserves the timing structure but does not perform independent alignment for longer translations.
+- Translation quality, transcription accuracy, model availability, and API costs depend on the provider and input.
+- Processing is synchronous. Short clips are recommended for this educational prototype.
+- LinguaX does not persist a translation history. Older versions used a local SQLite history file, which is no longer created.
+
+## Engineering notes
+
+See [the architecture and design decisions](docs/ARCHITECTURE.md) for the processing pipeline, external dependencies, tradeoffs, and known extensions.
+
+## Background
+
+Developed as a capstone for the AI First Developer educational program. This repository also contains other assignments and learning exercises. This codebase is a portfolio prototype and has not been independently verified as production ready.
+
+[Original presentation](https://www.canva.com/design/DAGQZMDAeEI/mwx65uoRkltHCMQhDoTUWg/view)
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Presentation
-
-For further details about the project, you can access the presentation [here](https://www.canva.com/design/DAGQZMDAeEI/mwx65uoRkltHCMQhDoTUWg/view?utm_content=DAGQZMDAeEI&utm_campaign=share_your_design&utm_medium=link&utm_source=shareyourdesignpanel).
+No standalone license file is currently included for this capstone. Contact the repository owner before reusing the source in another project.
