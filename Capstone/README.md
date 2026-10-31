@@ -1,27 +1,27 @@
 <div align="center">
 
-<img src="assets/LOGO.png" alt="LinguaX logo" width="140" />
+<img src="assets/cover.svg" width="100%" alt="LinguaX: transcription, translation and timestamped video subtitles" />
 
-# LinguaX
+**An educational AI application that turns video and audio clips into timed subtitles.**
 
-**AI assisted transcription, translation and timestamped subtitles**
-
-An educational Streamlit application that turns video and audio files into subtitles while preserving the actual timing reported by Whisper.
+[Getting started](#getting-started) · [Architecture](docs/ARCHITECTURE.md) · [Tests](#validation)
 
 </div>
 
-## What it does
+## Overview
 
-1. Extracts mono audio from uploaded media with FFmpeg.
-2. Requests a Whisper transcription with **segment timestamps**.
-3. Optionally translates each timed subtitle segment using a language model.
-4. Exports valid SubRip subtitles and a ZIP archive for multiple files.
+LinguaX combines audio extraction, speech recognition and language translation in a Streamlit application. It uses Whisper's actual segment timestamps to generate SubRip subtitle files without guessing timing from text.
 
-No fabricated timestamps and no automatic database history. Uploaded files are processed in a temporary directory and removed when processing finishes. Transcript results are retained only in the active Streamlit session.
+## What it includes
 
-## Quick start
+* Audio extraction from supported media using FFmpeg.
+* Whisper transcription with real source audio timing.
+* Optional translation into selected languages while retaining source cue boundaries.
+* Individual subtitle downloads and a ZIP bundle for multiple clips.
 
-**Prerequisites:** Python 3.11 or newer, FFmpeg installed on your system, and an OpenAI API key with available credits.
+## Getting started
+
+**Requirements:** Python 3.11 or newer, an FFmpeg executable on your PATH and an OpenAI API key with available quota.
 
 From the repository root:
 
@@ -30,88 +30,57 @@ cd Capstone
 python -m venv .venv
 ```
 
-Activate the environment:
-
-```bash
-# macOS / Linux
-source .venv/bin/activate
-```
-
-```powershell
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-```
-
-Install dependencies:
+Activate the environment using `source .venv/bin/activate` on macOS or Linux, or `.venv\Scripts\Activate.ps1` in Windows PowerShell.
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env`, then replace the placeholder value for `OPENAI_API_KEY`. Never commit your actual key.
+Copy `.env.example` to `.env` and set `OPENAI_API_KEY`. Check that `ffmpeg -version` works before launching.
 
 ```bash
 streamlit run src/app.py
 ```
 
-Open the local address provided by Streamlit, upload one or more media files, and optionally select translation languages.
+Upload a short media clip and optionally select translation languages. Audio and text are sent to the external AI provider. API use may incur charges.
 
-**FFmpeg check:** Run `ffmpeg -version` in the same terminal. The Python package `ffmpeg-python` does not install the FFmpeg executable.
-
-## Project layout
+## Repository structure
 
 ```text
 Capstone/
-├── .env.example
-├── .gitignore
-├── .streamlit/
-│   └── config.toml
-├── assets/
-│   └── LOGO.png
-├── Data/                 # Original educational video demos
-├── docs/
-│   └── ARCHITECTURE.md
-├── src/
-│   ├── app.py            # Streamlit interface
-│   ├── utils.py          # FFmpeg and OpenAI integrations
-│   └── subtitles.py      # Pure SubRip formatting and validation
-├── tests/
-│   ├── conftest.py
-│   ├── test_subtitles.py
-│   └── test_utils.py
+├── assets/               # Project graphics
+├── Data/                 # Original coursework demonstration media
+├── docs/                 # Architecture and engineering decisions
+├── src/                  # Streamlit UI, provider integration, subtitle logic
+├── tests/                # Unit tests using mocked API responses
+├── .env.example          # Local environment sample
 ├── requirements.txt
 ├── requirements-dev.txt
 └── README.md
 ```
 
-## Tests
+## Validation
 
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m pytest -q tests
 ```
 
-The tests use mocked API responses and do not require an OpenAI key or send paid requests.
+Tests validate timestamps, subtitle formatting and mocked provider responses. They do not require an API key or make paid calls. Full processing with FFmpeg and a live provider still needs a separate integration test.
 
-## Limitations and privacy
+## Architecture & decisions
 
-- Uploads are sent to an external AI provider for processing. Do not upload confidential, regulated, or third-party material without authorization.
-- The transcription service has a request size limit. LinguaX checks the extracted MP3 against a 24 MB local cap. It does not yet implement automatic audio splitting.
-- Translated text keeps Whisper's **source segment boundaries**. This preserves the timing structure but does not perform independent alignment for longer translations.
-- Translation quality, transcription accuracy, model availability, and API costs depend on the provider and input.
-- Processing is synchronous. Short clips are recommended for this educational prototype.
-- LinguaX does not persist a translation history. Older versions used a local SQLite history file, which is no longer created.
+The UI, external integrations and pure subtitle serialization live in separate modules. [Architecture notes](docs/ARCHITECTURE.md) describe the flow, tradeoffs and future improvements.
 
-## Engineering notes
+## Security & limitations
 
-See [the architecture and design decisions](docs/ARCHITECTURE.md) for the processing pipeline, external dependencies, tradeoffs, and known extensions.
-
-## Background
-
-Developed as a capstone for the AI First Developer educational program. This repository also contains other assignments and learning exercises. This codebase is a portfolio prototype and has not been independently verified as production ready.
-
-[Original presentation](https://www.canva.com/design/DAGQZMDAeEI/mwx65uoRkltHCMQhDoTUWg/view)
+* Only upload media you are authorized to send to an external provider.
+* Uploaded files are handled in a temporary directory and removed after processing.
+* Results remain in the current Streamlit session.
+* Input recordings above the extracted audio size limit require manual splitting.
+* Translation retains source timing, which is not the same as target language subtitle alignment.
+* This is an educational prototype, not a verified production deployment.
 
 ## License
 
-This repository includes an [MIT license](../LICENSE). Review that license for reuse conditions.
+The parent repository includes an [MIT license](../LICENSE). The original educational [presentation](https://www.canva.com/design/DAGQZMDAeEI/mwx65uoRkltHCMQhDoTUWg/view) is also available.
