@@ -96,7 +96,7 @@ The tests use mocked API responses and do not require an OpenAI key or send paid
 ## Limitations and privacy
 
 - Uploads are sent to an external AI provider for processing. Do not upload confidential, regulated, or third-party material without authorization.
-- The transcription service has a request size limit. LinguaX checks the extracted MP3 against a 24 MiB local cap. It does not yet implement automatic audio splitting.
+- The transcription service has a request size limit. LinguaX checks the extracted MP3 against a 24 MB local cap. It does not yet implement automatic audio splitting.
 - Translated text keeps Whisper's **source segment boundaries**. This preserves the timing structure but does not perform independent alignment for longer translations.
 - Translation quality, transcription accuracy, model availability, and API costs depend on the provider and input.
 - Processing is synchronous. Short clips are recommended for this educational prototype.
@@ -114,4 +114,4 @@ Developed as a capstone for the AI First Developer educational program. This rep
 
 ## License
 
-No standalone license file is currently included for this capstone. Contact the repository owner before reusing the source in another project.
+This repository includes an [MIT license](../LICENSE). Review that license for reuse conditions.
