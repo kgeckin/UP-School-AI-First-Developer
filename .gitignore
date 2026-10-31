@@ -1,0 +1,29 @@
+# Private configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Python tooling and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Temporary application artifacts
+*.db
+*.db-journal
+*.sqlite3
+*.srt
+*.zip
+uploads/
+output/
+
+# Local developer files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
